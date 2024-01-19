@@ -1,2 +1,2 @@
 # ndtrung
-My personal page
+This is my personal page on GitHub.
