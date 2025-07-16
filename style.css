@@ -1,6 +1,7 @@
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: Open Sans, sans-serif;
+  font-size: 18px;
 }
 
 .container {
@@ -30,5 +31,23 @@ body {
   flex: 1;
   padding: 20px;
   overflow-y: auto;
+}
+
+/* Header section */
+.site-header {
+  text-align: center;
+  font-size: 48px;
+  font-weight: bold;
+  margin-top: 30px;
+  margin-bottom: 10px;
+}
+
+/* Horizontal rule under header */
+.header-separator {
+  border: none;
+  height: 8px;
+  background-color: #FA8072;
+  width: 200%;
+  margin: 0 auto 30px auto;
 }
 
