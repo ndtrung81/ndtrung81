@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Notes - My Site</title>
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+</head>
+<body>
+<div class="container">
+  <div class="navbar">
+    <h3><span style="color: #FF6666;">Trung D. Nguyen</span></h3>
+    <a href="index.html">Home</a>
+    <a href="research.html">Research</a>
+    <a href="software.html">Software</a>
+    <a href="notes.html">Notes</a>
+  </div>
+  <div class="content">
+    <h2>Constants and conversions</h2>
+    <h3>Real units to dimensionless units</h3>
+
+
+    <ul>
+      <li>Boltzmann constant: \( k_B  = 1.3806 \times 10^{-23} \text{J/K} = 8.314 \, \text{J/mol/K} = 1.987 \, \text{cal/mol/K} \)</li>
+      <li>Thermal energy at 298K is: \( k_B = 8.314 \text{J/mol/K} \cdot 298\text{K} = 2478 \, \text{J/mol} = 4.114 \cdot 10^{-21} \, \text{J} = 0.59 \, \text{kcal/mol} \)</li>
+      <li>Van der Waals strength: \( 0.4 - 4.0 \, \text{kJ/mol} = 0.1 - 1.0 \, \text{kcal/mol} \) same order as \( k_BT \), range 0.3 - 0.6 nm</li>
+      <li>Coulombic repulsion: the Bjerrum length \( l_B = 0.7 \, \text{nm} \) in water (dielectric constant, \( \epsilon = 80 \)), which means electrostatic energy becomes equal \( k_B T \) at about 0.7 nm. In a highly ionic medium, \( l_B \) would be reduced.</li>
+      <li>Hydrogen bonding (electrostatic attraction): 1 - 5 kcal/mol -> about 2 - 10 times stronger than \( k_B T \), range = 0.3 nm</li>
+    </ul>
+    
+    <h3>Reduced time unit</h3>
+
+    Usually in a simulation the time unit is defined based on the length scale, mass and energy scale:
+
+    \[ \tau = \sigma \sqrt{\frac{m}{\epsilon}}, \]
+        
+    where
+    <ul>  
+      <li>\(m = 10^{-21} \, \text{kg}\)</li>
+      <li>\(\epsilon = 50 \, \text{kJ/mol} = 50 \cdot 10^{+3}/6.023\cdot 10^{+23} = 8.3 \cdot 10^{-20} \, \text{Nm} = 8.3 \cdot 10^{-20} \text{kg m}^2/\text{s}^2 \)</li>
+      <li>\( \sigma = 5 \cdot 10^{-9} \, \text{m} \) (typical diameter of a nanoparticle)</li>
+    </ul>
+   
+    which gives 
+
+    \[ \tau = 5 \cdot 10^{-9} \, \text{m} \sqrt{\frac{10^{-21} \, \text{kg}}{8.3 \cdot 10^{-20} \, \text{kg m}^2/\text{s}^2}} = 0.5 \cdot 10^{-9} \, \text{s} = 0.5 \, \text{ns}. \]
+
+    This means that for the given choice of mass, energy and length scales, the time unit is 0.5 nanoseconds. With that time unit, a time step of 0.002\tau corresponds to 0.001 ns, or 1 ps.
+
+    <h3>Energy scale</h3>
+
+    <p>1 kcal/mol = 0.0433634 eV; then 1 (kcal/mol)/e = 0.0433634 V = 43.3634 mV</p>
+
+    <p>1 \( k_BT \) (at T = 300K) = 0.59 kcal/mol; then 1 kT/e = 0.59 kcal/mol/e = 0.59 * 43.3634 mV = 25.584406 mV</p>
+
+    At T = 298K, an interaction energy of 50 kJ/mol corresponds to a reduced energy of \( \epsilon/k_BT = 50 \cdot 10^{3} J/(6.023 \cdot 10^{23}) / (4.114 \cdot 10^{-21} J ) = 20.0 \), where \( N_A = 6.023 \cdot 10^{23} \) is the Avogadro's number.
+  </div>
+</div>
+</body>
+</html>
+

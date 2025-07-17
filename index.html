@@ -32,6 +32,7 @@
 
 <p>Highlights -- News</p>
 <ul>
+  <li><b>7/2025</b>: I contributed to the KOKKOS package in LAMMPS by allowing users to tune the GPU performance via kernel parameters (PR <a href="https://github.com/lammps/lammps/pull/4573">4573</a>). The tuned performance is <b>1.2-1.6X</b> faster than using the default parameter set for most tested systems.</li>
   <li><b>1/2025</b>: GPU acceleration can make LAMMPS run <b>4X-40X</b> faster than CPU-only on the OLCF Frontier supercomputer with AMD GPUs. The more computationally intensive the molecular models, the more speedup the GPUs can offer:  Systems of dipolar particles benefit the most from GPU acceleration.</li>
   <li><b>11/2024</b>: I concluded my contribution to the UChicago Lighthouse project by optimizing LAMMPS GPU acceleration on the ALCF Polaris cluster. The simulation performance with NVIDIA A100 GPUs is <b>3X-16X</b> faster than the CPU-only runs on the full node with 32 cores depending on the nature of molecular systems, that is, how much computation is offloaded to the GPUs.
   <div style="text-align: center;">
