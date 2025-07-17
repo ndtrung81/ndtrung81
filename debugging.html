@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Notes - My Site</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <div class="navbar">
+    <h3>Trung D. Nguyen</h3>
+    <a href="index.html">Home</a>
+    <a href="research.html">Research</a>
+    <a href="software.html">Software</a>
+    <a href="notes.html">Notes</a>
+  </div>
+  <div class="content">
+    <h2>Code debugging and profiling</h2>
+    <h3>Debug C/C++ codes with gdb</h3>
+
+    <ol>
+      <li>Build the source code with -g</li> 
+      <li>Lauch gdb with the app
+      <pre>
+      gdb --args ./exec param1 param2
+      </pre>
+      </li>
+      <li>Create breakpoints before running the app
+      <pre>
+      gdb> b source.cpp:124
+      </pre>
+
+      or using under a certain condition
+      <pre>
+      gdb> b source.cpp:124 if variable == 4
+      </pre>
+      </li>
+      <li>Run the app with command-line arguments
+      <pre>
+      gdb> run param1 param2
+      </pre>
+      </li>
+      <li>when the breakpoint is hit, you can see the back trace, inspect variables, step through the code and so on
+      <pre>
+      gbd> bt
+      gbd> bt 12
+      </pre>
+      going up and down the stack
+      <pre>
+      gdb> up
+      gdb> down
+      </pre>
+      step to a certain frame
+      <pre>
+      gdb> f 5
+      </pre>
+      list the source code around the current frame
+      <pre>
+      gdb> l
+      </pre>
+      inspect the variable values
+      <pre>
+      gdb> p var1
+      </pre>
+      jump to the next statement
+      <pre>
+      gdb> n
+      </pre>
+      step out of the current frame
+      <pre>
+      gdb> finish
+      </pre>
+      continue to the next breakpoint
+      <pre>
+      gdb> c
+      </pre>
+      </li>
+      <li>To exit gdb, use
+      <pre>
+      gdb> quit
+      </pre>
+      </li>
+    </ol>
+
+
+
+<h3>Debug multiple MPI applications with gdb</h3>
+
+
+After the application was built with -g flags, we can debug it with gdb:
+
+mpirun -np 4 xterm -e gdb --args binary_name input_parameters
+
+which launches 4 xterm terminals corresponding to 4 MPI processes. Breakpoints can be created in one of the terminals as usual. And then, execute
+
+run
+
+at all the terminals to start debugging.
+
+<h3>Monitor memory consumption with valgrind massif</h3>
+
+valgrind --tool=massif ./application args
+
+to generate the memory consumtion over time of the given application, which can help track down memory leaks due to function calls. The output file massive.out.* can be visualized by massif-visualizer.
+
+<h3>Use valgrind to detect memory-related issues</h3>
+
+I found the following website that is helpful:
+
+http://www.cprogramming.com/debugging/valgrind.html
+
+For my convenience, I extract a couple of notes here:
+
+1. Compile the program with -g so that the debug symbols are stored in the binary, say, a.out
+
+2. Invoke valgrind with the binary
+
+valgrind --tool=memcheck --leak-check=yes --track-origins=yes a.out arg1 arg2
+
+3. The following output messages:
+
+"blocks are definitely lost in loss record": indicates memory is not freed after malloc() or new, see the line that is reported.
+
+"Invalid write of size" and "Address XX is 0 bytes after a block of size YY alloc'd": indicates an out-of-bound write to arrays.
+
+"Conditional jump or move depends on uninitialised value(s)": indicates uninitialized variables are being used.
+
+"Invalid free()" or "Mismatched free() / delete / delete []": indicates double free() or errors in memory allocation
+
+<h3>Profile CUDA codes with nvvp</h3>
+
+NVVP (NVIDIA Visual Profiler) comes with CUDA Toolkit. For CUDA Toolkit 11.x, NVVP is compatible with Java 1.8 (for its eclipse GUI), and would crash with the default Java 11. After install openjdk 1.8, 
+
+sudo dnf install java-1.8.0-openjdk.x86_64
+
+run "sudo alternatives --config java" to switch to java-1.8. Then launch nvvp from the command line.
+
+<h3>Profile MPI applications using VampirTrace</h3>
+
+1. Configure Makefile to use vtCC
+
+- Load GNU programming environment, CUDA toolkit 
+
+- Load the module vampirtrace
+
+module load vampirtrace
+
+- Modify the Makefile to specify CCFLAGS and LINKFLAGS be: vtCC -vt:mpi or vtCC -vt:hyb
+
+- Show include/library paths and linked libs of vtCC -vt:mpi (or vtCC -vt:hyb) with -v
+
+vtCC -vt:mpi -v
+
+- Note the version of the PAPI library: -L/../papi/perf_events/cuda/lib 
+
+- Build the app
+
+2. Configure the PBS script
+
+- module load vampirtrace
+
+- Specify vampirtrace variables
+
+export VT_PFORM_GDIR=traces
+
+if [ ! -e $VT_PFORM_GDIR ]; then
+
+  mkdir $VT_PFORM_GDIR
+
+fi
+
+export VT_FILTER_SPEC=./myfilter.spec
+
+export VT_MAX_FLUSHES=10
+
+export VT_METRICS=PAPI_FP_OPS:PAPI_TOT_INS
+
+export VT_MPITRACE=yes
+
+export VT_BUFFER_SIZE=32M
+
+- The filter file myfilter.spec looks like the following:
+
+final_integrate -- 1000
+
+* -- 2000
+
+meaning that sampling the function final_integrate is performed no more than 1000 times, other functions no more than 2000 times.
+
+3. Submit the PBS script, the trace files will be put into the folder traces.
+
+4. Copy the folder traces back to a local machine (if of small size) and open the .otf file using VampirClient.
+
+If the traces folder is large in size, load the vampirserver, open the otf file in the folder traces. From the local machine, launch VampirClient and connect to the port ID given by the server. 
+
+Profile applications using CrayPat
+
+The official instruction is given at: http://www.olcf.ornl.gov/?kb_articles=software-jaguar-craypat&menu=software
+
+1. Build application using perftools
+
+module load PrgEnv-gnu
+
+module unload cudatoolkit (<-- if no cuda library is available)
+
+module load perftools
+
+make clean
+
+make
+
+2. Instrument the binary using Automatic Profiling Analysis (APA)
+
+pat_build -O apa my_app
+
+which generated a binary named my_app+pat
+
+3. Run the instrumented binary
+
+aprun -n 16 my_app+pat < input.txt
+
+4. Generate the profile report from the generated .xf file
+
+pat_report -T -o report.txt my_app+pat.xf
+
+Profiling results are stored in the generated report.txt and .apa files.
+
+
+    
+  </div>
+</div>
+</body>
+</html>
+

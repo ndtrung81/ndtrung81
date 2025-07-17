@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Notes - My Site</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <div class="navbar">
+    <h3>Trung D. Nguyen</h3>
+    <a href="index.html">Home</a>
+    <a href="research.html">Research</a>
+    <a href="software.html">Software</a>
+    <a href="notes.html">Notes</a>
+  </div>
+  <div class="content">
+    <h2>LAMMPS GPU Package</h2>
+    There are two places you need to make addition to:the GPU library in lib/gpu (i.e. libgpu.a) and the /gpu styles in src/GPU. Let's say you have already implemented a pair style class named PairFoo. Now you want to have a new class PairFooGPU for GPU acceleration.
+
+<h3>Addition to the GPU library under <code>lib/gpu</code></h3>
+
+    You will need to add/implement four source files:
+    <ul>
+    <li><span style="color: #2222FF;">lal_foo.h</span>: header to the class Foo</li>
+    <li><span style="color: #2222FF;">lal_foo.cpp</span>: implementation of the class Foo</li>
+    <li><span style="color: #2222FF;">lal_foo.cu</span>: the GPU kernel(s) for the force compute, where the computation mirrors what you have in PairFoo.</li>
+    <li><span style="color: #2222FF;">lal_foo_ext.cpp</span>: contains an instance of the Foo class and the necessary functions to be added into the GPU library, libgpu.a. The functions are essentially invoked for initialize, compute and clean up the memory allocated for the Foo instance.</li>
+    </ul>
+
+    A good start to look at is the corresponding files for the Gauss class in lib/gpu. You will see how the per-type arrays are declared and allocated (<span style="color: #2222FF;">lal_gauss.h</span> and <span style="color: #2222FF;">lal_gauss.cpp</span>), 
+    how the kernels are implemented (<span style="color: #2222FF;">lal_gauss.cu</span>) and how the exported functions are defined (<span style="color: #2222FF;">lal_gauss_ext.cpp</span>). 
+
+    <h3>Addition to src/GPU</h3>
+
+    <p>Next, you will create an entry from src/GPU to call the external functions defined in <span style="color: #2222FF;">lal_foo_ext.cpp</span>. You will need to create the PairFooGPU class (pair_foo_gpu.h and pair_foo_gpu.cpp). Again, pair_gauss_gpu.h and pair_gauss_gpu.cpp are good examples to start with.</p>
+
+    <p>For CMake builds, you may want to modify the file <code>cmake/Module/Packages/GPU.cmake</code> if the new pair style depends on certain packages to be installed.</p>
+
+    <p>For GNU builds, similarly, you need to modify Install.sh in src/GPU so that the newly added pair style got installed when users (you) run "make yes-gpu" or "make package-update" from src/. The lines to be added should look similar to what is done to pair_gauss_gpu.cpp and pair_gauss_gpu.h.
+    Once you are done implementing the PairFooGPU class, you can copy the source files into src/ and rebuild LAMMPS with the updated GPU package:</p>
+    <pre><code>
+    make yes-gpu
+    make your_machine
+    </code></pre>
+
+
+    
+  </div>
+</div>
+</body>
+</html>
+

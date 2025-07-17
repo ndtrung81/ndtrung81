@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Notes - My Site</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <div class="navbar">
+    <h3>Trung D. Nguyen</h3>
+    <a href="index.html">Home</a>
+    <a href="research.html">Research</a>
+    <a href="software.html">Software</a>
+    <a href="notes.html">Notes</a>
+  </div>
+  <div class="content">
+    <h2>LAMMPS Builds with GPU Support</h2>
+    <p>There are 2 options for GPU support in LAMMPS: via the GPU package and the KOKKOS package. Depending on your simulation and the features that are available with these packages, you can decide which package to use at run time. To build these 2 packages in a single LAMMPS binary, you can following cmake configuration:</p>
+    <pre><code>
+    mkdir build
+    cd build
+    cmake -D PKG_KSPACE=on -D PKG_MOLECULE=ON -D PKG_RIGID=ON \
+      -D PKG_CLASS2=ON -D PKG_AMOBEA=ON -D PKG_ASPHERE=ON \
+      -D PKG_REPLICA=ON -D PKG_GPU=ON -D GPU_API=cuda -D GPU_ARCH=sm_80 \
+      -D BUILD_MPI=yes -D BUILD_OMP=ON \
+      -D PKG_KOKKOS=ON -D Kokkos_ARCH_PASCAL60=off -D Kokkos_ARCH_NATIVE=yes \
+      -D Kokkos_ARCH_AMPERE80=ON -D Kokkos_ENABLE_CUDA=yes -D Kokkos_ENABLE_OPENMP=yes \
+      -DFFT_KOKKOS=CUFFT \
+      -D CMAKE_CXX_COMPILER=`which mpicxx` -D MPI_C_COMPILER=`which mpicc`  ../cmake
+    make -j4
+    </code></pre>
+
+    <p>Here you are using the default KISS FFT for the CPU side. You can use -D FFT=FFTW3 and specify the available FFTW3 libraries.</p>
+
+    <p>Note that you need <code>-D Kokkos_ARCH_AMPERE80=ON</code> for the KOKKOS package, the GPU package is actually built with all the architectures from 60 through 90.</p>
+    </p>If your cluster has Intel MKL, you can use FFT provided by MKL by loading the suitable module:</p>
+    <pre>
+    module load mkl
+    </pre>
+    </p>which should set the environment variable <code>MKLROOT</code> and then specify <code>-D FFTW3_INCLUDE_DIR=$MKLROOT/include/fftw</code>. The cmake command would be</p>
+    <pre><code>
+    cmake -D PKG_KSPACE=on -D PKG_MOLECULE=ON -D PKG_RIGID=ON \
+      -D PKG_CLASS2=ON -D PKG_AMOBEA=ON -D PKG_ASPHERE=ON \
+      -D PKG_REPLICA=ON -D PKG_GPU=ON -D GPU_API=cuda -D GPU_ARCH=sm_80 \
+      -D BUILD_MPI=yes -D BUILD_OMP=ON \
+      -D PKG_KOKKOS=ON -D Kokkos_ARCH_PASCAL60=off -D Kokkos_ARCH_NATIVE=yes \
+      -D Kokkos_ARCH_AMPERE80=ON -D Kokkos_ENABLE_CUDA=yes -D Kokkos_ENABLE_OPENMP=yes \
+      -DFFT_KOKKOS=CUFFT -DFFT=MKL -DFFTW3_INCLUDE_DIR=$MKLROOT/include/fftw \
+      -D CMAKE_CXX_COMPILER=`which mpicxx` -D MPI_C_COMPILER=`which mpicc`  ../cmake
+    </code></pre>
+
+
+
+    
+  </div>
+</div>
+</body>
+</html>
+

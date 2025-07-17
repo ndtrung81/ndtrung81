@@ -28,9 +28,14 @@ body {
 }
 
 .content {
-  flex: 1;
-  padding: 20px;
-  overflow-y: auto;
+  width: 800px;           /* Set fixed width */
+  height: auto;          /* Set fixed height */
+  padding: 20px 30px;
+  border: 1px solid #ccc; /* Add a border/frame */
+  overflow-y: auto;       /* Scroll if content overflows */
+  background-color: #fff; /* Optional: white background */
+  margin: 20px auto;      /* Center horizontally */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Optional: soft shadow */
 }
 
 /* Header section */
@@ -47,7 +52,17 @@ body {
   border: none;
   height: 8px;
   background-color: #FA8072;
-  width: 200%;
+  width: 100%;
   margin: 0 auto 30px auto;
 }
 
+pre {
+  background-color: #f4f4f4;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-family: "Source Code Pro", monospace;
+  font-size: 14px;
+  overflow-x: auto;
+  white-space: pre-wrap; /* Optional: wraps long lines */
+}
