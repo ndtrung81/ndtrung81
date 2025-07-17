@@ -13,18 +13,21 @@ body {
   width: 200px;
   background-color: #f4f4f4;
   padding: 20px;
+  font-size: 20px;
   box-shadow: 2px 0 5px rgba(0,0,0,0.1);
 }
 
 .navbar a {
   display: block;
-  padding: 10px 0;
+  padding: 10px 10px;
   text-decoration: none;
+  border-radius: 5px;
   color: #333;
 }
 
 .navbar a:hover {
   background-color: #ddd;
+  transition: background-color 0.3s ease;
 }
 
 .content {
