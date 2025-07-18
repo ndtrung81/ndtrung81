@@ -17,7 +17,7 @@
   <div class="content">
     <div class="site-header">SOFTWARE</div>
     <hr class="header-separator">
-    <p>I am an advocate for open-source software development. The software packages I have developed, and been contributing to, are listed on my <a href="https://github.com/ndtrung81">GitHub</a> page.</p>
+    <p>I am an advocate for open-source software development. The software packages I have been contributing to, and developed from scratch, are listed on my <a href="https://github.com/ndtrung81">GitHub</a> page.</p>
     <p>Molecular simulation tools:</p>
     <ul>
       <li><a href="https://github.com/lammps/lammps">LAMMPS</a></li>
@@ -25,6 +25,17 @@
       <li><a href="https://github.com/ndtrung81/lammps-plugins">LAMMPS KOKKOS-enabled plugins</a></li>
       <li><a href="https://github.com/glotzerlab/hoomd-blue">HOOMD-Blue</a></li>
     </ul>
+    The plot below compares the the performance of the GPU implementations of the 4-million dipolar particles I implemented for the LAMMPS KOKKOS and GPU packages with the full-node, CPU-only version on the ORNL Frontier supercomputer with AMD MI250X GPUs.
+    <div style="text-align: center;">
+          <img src="images/lammps-dipole-frontier-4M.png" alt="lammps-dipole-frontier-4M" style="width: 640px; display: block; margin: auto; border: 2px solid #444; border-radius: 8px;
+            padding: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    </div>
+    The plot below shows that the performance of the GPU version of the Tersoff potential I implemented in the LAMMPS GPU package is 4-5X faster than the CPU-only version on the ORNL Summit supercomputer with NVIDIA V100 GPUs.
+    The total number of atoms simulated is 4 million.
+    <div style="text-align: center;">
+          <img src="images/tersoff-gpu-summit.png" alt="tersoff-gpu-summit" style="width: 640px; display: block; margin: auto; border: 2px solid #444; border-radius: 8px;
+            padding: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    </div>
     <p>Document query tool:</p>
     <ul>
       <li><a href="https://github.com/ndtrung81/lmp-document-query">LAMMPS Documentation Query</a>: an interactive tool to query LAMMPS documentation using RAG and LLMs.</li>
