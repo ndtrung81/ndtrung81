@@ -50,7 +50,7 @@
       -D CMAKE_CXX_COMPILER=`which mpicxx` -D MPI_C_COMPILER=`which mpicc`  ../cmake
     </code></pre>
 
-    On OLCF Frontier with AMD GPUs and the HIP ROCm toolchain, I used the following cmake command to build the GPU package.
+    On OLCF Frontier with AMD GPUs and the HIP ROCm toolchain, I loaded the following modules and the linker flags:
     <pre><code>
     module load amd/6.3.1
     module load rocm/6.3.1
@@ -58,7 +58,12 @@
     module load hwloc
     module load cmake
     LINKFLAGS="-L${MPICH_DIR}/lib -lmpi_amd ${PE_MPICH_GTL_DIR_amd_gfx90a} ${PE_MPICH_GTL_LIBS_amd_gfx90a}"
+    </code></pre>
 
+    Note that the MPI lib is <code>libmpi_amd</code> and the GTL library is needed for linking for both GPU and KOKKOS packages.
+
+    Then I used the following cmake command to build with the GPU package:
+    <pre><code>
     cmake -S cmake -B build-gpu -C cmake/presets/basic.cmake -D PKG_DIPOLE=on -D PKG_DPD-BASIC=on \
       -D PKG_SPH=on -DPKG_REPLICA=on -DPKG_MC=on -D PKG_GPU=yes -D GPU_API=hip -D HIP_ARCH=gfx90a \
       -D CMAKE_CXX_COMPILER=hipcc -D CMAKE_C_COMPILER=hipcc -DCMAKE_BUILD_TYPE=RelWithDebInfo \
@@ -66,8 +71,6 @@
       -D BUILD_OMP=on -D CMAKE_EXE_LINKER_FLAGS="${LINKFLAGS}"
     cmake --build build-gpu -j8
     </code></pre>
-
-    Note that the MPI lib is <code>libmpi_amd</code> and the GTL library is needed for linking for both GPU and KOKKOS packages.
 
     For the KOKKOS build, with the same modules loaded I used the following command
     <pre><code>
@@ -80,7 +83,7 @@
     cmake --build build-kokkos -j8
     </code></pre>
 
-    To build both GPU and KOKKOS packages, I used the following command:
+    To build both GPU and KOKKOS packages, I used the following cmake command (note the KOKKOS OPENMP backend is on):
     <pre><code>
     cmake -S cmake -B build -C cmake/presets/basic.cmake -D PKG_DIPOLE=on -D PKG_DPD-BASIC=on \
       -D PKG_SPH=on -DPKG_REPLICA=on -DPKG_MC=on -D PKG_GPU=yes -D GPU_API=hip -D HIP_ARCH=gfx90a \
