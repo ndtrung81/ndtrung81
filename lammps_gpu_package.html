@@ -15,17 +15,20 @@
     <a href="notes.html">Notes</a>
   </div>
   <div class="content">
-    <h2>LAMMPS GPU Package</h2>
-    There are two places you need to make addition to:the GPU library in lib/gpu (i.e. libgpu.a) and the /gpu styles in src/GPU. Suppose that you have already implemented a pair style class named PairFoo. Now you want to have a new class PairFooGPU for GPU acceleration.
+    <h2>Implementing new functionalities for the LAMMPS GPU Package</h2>
+    <p>
+    Suppose that you have already implemented a pair style class named PairFoo. Now you want to have a new class PairFooGPU for GPU acceleration.
+    The following steps will guide you through the process of adding a new pair style to the GPU package in LAMMPS.
+    There are two places you need to add new source files: the Foo class and exported functions the GPU library in lib/gpu (i.e. libgpu.a) and the new /gpu styles in src/GPU.
 
-<h3>Addition to the GPU library under <code>lib/gpu</code></h3>
+<h3>1. Addition to the GPU library under <code>lib/gpu</code></h3>
 
     You will need to add/implement four source files:
     <ul>
-    <li><span style="color: #2222FF;">lal_foo.h</span>: header to the class Foo</li>
-    <li><span style="color: #2222FF;">lal_foo.cpp</span>: implementation of the class Foo</li>
-    <li><span style="color: #2222FF;">lal_foo.cu</span>: the GPU kernel(s) for the force compute, where the computation mirrors what you have in PairFoo.</li>
-    <li><span style="color: #2222FF;">lal_foo_ext.cpp</span>: contains an instance of the Foo class and the necessary functions to be added into the GPU library, libgpu.a. The functions are essentially invoked for initialize, compute and clean up the memory allocated for the Foo instance.</li>
+    <li><span style="color: #2222FF;">lal_foo.h</span>: header of the class Foo</li>
+    <li><span style="color: #2222FF;">lal_foo.cpp</span>: contains the implementation of the class Foo</li>
+    <li><span style="color: #2222FF;">lal_foo.cu</span>: contains the GPU kernel(s) for the force compute, where the computation mirrors what you have in PairFoo.</li>
+    <li><span style="color: #2222FF;">lal_foo_ext.cpp</span>: creates an instance of the Foo class and exports the necessary functions to be invoked by the GPU version of the pair style to initialize a Foo instance.</li>
     </ul>
 
     <p>A good start for implementing a new pair style to look at is the corresponding files for the Gauss class in lib/gpu. You will see how the per-type arrays are declared and allocated
@@ -44,18 +47,27 @@
       These arrays are data structures provided by the Geryon library that allow for efficient memory management and data transfer between host and device.
     </p>
 
-    <h3>Addition to src/GPU</h3>
+    <h3>2. Addition to src/GPU</h3>
 
     <p>Next, you will create an entry from src/GPU to call the external functions defined in <span style="color: #2222FF;">lal_foo_ext.cpp</span>.
-       You will need to create the PairFooGPU class (pair_foo_gpu.h and pair_foo_gpu.cpp). <span style="color: #2222FF;"><a href="https://github.com/lammps/lammps/blob/develop/src/GPU/pair_gauss_gpu.h">pair_gauss_gpu.h</a></span> 
+       You will need to create the PairFooGPU class (pair_foo_gpu.h and pair_foo_gpu.cpp) derived from your PairFoo class. <span style="color: #2222FF;"><a href="https://github.com/lammps/lammps/blob/develop/src/GPU/pair_gauss_gpu.h">pair_gauss_gpu.h</a></span> 
        and <span style="color: #2222FF;"><a href="https://github.com/lammps/lammps/blob/develop/src/GPU/pair_gauss_gpu.cpp">pair_gauss_gpu.cpp</a></span> are good examples to start with.</p>
 
+    <p>In the PairFooGPU class, you will invoke the external functions from the Gauss class provided by <span style="color: #2222FF;"><a href="https://github.com/lammps/lammps/blob/develop/lib/gpu/lal_gauss_ext.cpp">lal_gauss_ext.cpp</a></span>
+      at the proper place. For instance, in the <code>init_style()</code> function, you will call the <code>init()</code> function of the Gauss class to allocate memory for the pair coefficients and transfer them to the device.
+      In the <code>PairFooGPU::compute()</code> function, you will call the corresponding functions: <code>_compute()</code> function for "neigh no" (neighbor builds on the host) or <code>_compute_n()</code> for "neigh yes" (neighbor builds on the device)
+      to compute the atom forces, potential energy and virial. The class destructor will invoke the <code>clear()</code> function to release the memory allocated by the GPU library both on host and device.
+    </p>
+
+    <h3>3. Build LAMMPS with the new pair style</h3>
     <p>For CMake builds, you may want to modify the file <code>cmake/Module/Packages/GPU.cmake</code> if the new pair style depends on certain packages to be installed.
     You then run cmake with the following command to build LAMMPS with the GPU package with your new pair style:</p>
     <pre><code>
-    cmake -S cmake -B build -C cmake/presets/basic.cmake -D PKG_GPU=ON -D GPU_API=cuda
+    cmake -S cmake -B build -C cmake/presets/basic.cmake -D PKG_GPU=ON -D GPU_API=cuda -D GPU_PREC=mixed
     cmake --build build -j4
     </code></pre>
+
+    By design, your PairFooGPU class depends on PairFoo, so if PairFoo is part of the MISC package, for example, PairFooGPU will be built with both <code>-D PKG_MISC=ON</code> and <code>-D PKG_GPU=ON</code>.
 
     <p>For GNU make builds, similarly, you need to modify Install.sh in src/GPU so that the newly added pair style got installed when users (you) run "make yes-gpu" or "make package-update" from src/. The lines to be added should look similar to what is done to pair_gauss_gpu.cpp and pair_gauss_gpu.h.
     Once you are done implementing the PairFooGPU class, you can copy the source files into src/ and rebuild LAMMPS with the updated GPU package:</p>
@@ -64,15 +76,36 @@
     make your_machine
     </code></pre>
 
-    <h3>Notes</h3>
+    <h4>Notes</h4>
     <ul>
     <li>If you need additional per-atom properties in the new pair style, then <span style="color: #2222FF;"><a href="https://github.com/lammps/lammps/blob/develop/lib/gpu/lal_dpd_coul_slater_long.h">lal_dpd_coul_slater_long.h</a></span>,
       <span style="color: #2222FF;"><a href="https://github.com/lammps/lammps/blob/develop/lib/gpu/lal_sph_lj.h">lal_sph_lj.h</a></span>
       and <span style="color: #2222FF;"><a href="https://github.com/lammps/lammps/blob/develop/lib/gpu/lal_base_amoeba.h">lal_base_amoeba.h</a></span> are good examples.</li>
-    <li>If you want to add new functionalities beyond pair styles, you can look at the <span style="color: #2222FF;"><a href="https://github.com/lammps/lammps/blob/develop/lib/gpu/lal_pppm.h">PPPM</a></span> class.
-    
     </ul>
-    
+
+    <h3>4. Test the new pair style</h3>
+    <p>To test the new pair style, you start with a simple input script, in.foo, that uses your PairFoo class. It is recommended that the input script require minimal setup,
+       perform a sufficient number of timesteps (for activating neighbor builds) and not include irrelevant features (such as computes and fixes).
+       The example input script should complete successfully and produce the expected output, such as the steady potential energy and pressure (as a measure of atom forces).
+       The log file for a parallel run with 4 MPI procs can be saved as reference.
+    </p>
+    <p>The next step is to run the input script with the GPU version of the pair style with the same number of MPI processes with the CPU-only version:
+    </p>
+    <pre><code>
+    mpirun -np 4 /path/to/lmp -in in.foo -sf gpu -pk gpu 1
+    </code></pre>
+    <p>
+    The output should be almost identical to the CPU-only version at the very first time step, and statistically consistent over time. To be careful, you can rebuild the GPU version
+    in the double precision mode (<code>-D GPU_PREC=double</code>) to compare the results with the CPU version. For pair styles that involve transdecendentals, deviations with the CPU-only version
+    over time are unavoidable even in double precision.
+    To debug the GPU pair style, switch to using 1 MPI process on 1 GPU and rebuild with the debug mode <code>-D GPU_DEBUG=ON</code> to get more information about the GPU kernel execution.
+    You can use gdb, and <code>printf</code> in the kernels with the CUDA backend (<code>-D GPU_API=cuda</code>) to debug the GPU code.
+    and
+    </p>
+    <h3>Notes</h3>
+    <p>
+    If you want to add new functionalities beyond pair styles, you can look at the <span style="color: #2222FF;"><a href="https://github.com/lammps/lammps/blob/develop/lib/gpu/lal_pppm.h">PPPM</a></span> class.
+    </p>
 </div>
 </body>
 </html>
