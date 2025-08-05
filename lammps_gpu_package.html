@@ -96,15 +96,20 @@
     </code></pre>
     <p>
     The output should be almost identical to the CPU-only version at the very first time step, and statistically consistent over time. To be careful, you can rebuild the GPU version
-    in the double precision mode (<code>-D GPU_PREC=double</code>) to compare the results with the CPU version. For pair styles that involve transdecendentals, deviations with the CPU-only version
-    over time are unavoidable even in double precision.
+    in the double precision mode (<code>-D GPU_PREC=double</code>) to compare the results with the CPU version. For pair styles that involve transcendental functions,
+    deviations with the CPU-only version over time are unavoidable even in double precision.
     To debug the GPU pair style, switch to using 1 MPI process on 1 GPU and rebuild with the debug mode <code>-D GPU_DEBUG=ON</code> to get more information about the GPU kernel execution.
     You can use gdb, and <code>printf</code> in the kernels with the CUDA backend (<code>-D GPU_API=cuda</code>) to debug the GPU code.
     and
     </p>
     <h3>Notes</h3>
     <p>
-    If you want to add new functionalities beyond pair styles, you can look at the <span style="color: #2222FF;"><a href="https://github.com/lammps/lammps/blob/develop/lib/gpu/lal_pppm.h">PPPM</a></span> class.
+    <ul>
+    <li>If you want to add new functionalities beyond pair styles, you can look at the <span style="color: #2222FF;"><a href="https://github.com/lammps/lammps/blob/develop/lib/gpu/lal_pppm.h">PPPM</a></span> class.</li>
+    <li>To add new bond/angles/dihedral styles, fixes and computes to the GPU package, you need to provide the GPU kernels and the exported functions to handle allocation/deallocation of the data structures
+    and their host-device transfers, similar to what is done with the new pair style here.</li>
+    </ul>  
+    
     </p>
 </div>
 </body>
